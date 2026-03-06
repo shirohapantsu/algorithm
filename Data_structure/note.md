@@ -1,0 +1,529 @@
+# 数据结构
+
+## 综述
+常见的数据结构：  
+- 数组
+- 链表
+- 队列
+- 哈希表
+- 树
+- 堆
+- 图
+
+## 1.数组和链表
+
+### 数组
+数组（array）是一种线性数据结构，其将相同类型的元素存储在连续的内存空间中。我们将元素在数组中的位置称为该元素的索引（index）。
+
+### 链表
+链表（linked list）是一种线性数据结构，其中的每个元素都是一个节点对象，各个节点通过“引用”相连接。引用记录了下一个节点的内存地址，通过它可以从当前节点访问到下一个节点。
+
+## 2.栈与队列
+
+### 栈
+
+栈（stack）是一种遵循**先入后出**逻辑的线性数据结构。我们把堆叠元素的顶部称为“栈顶”，底部称为“栈底”。将把元素添加到栈顶的操作叫作“入栈”，删除栈顶元素的操作叫作“出栈”。
+
+栈只能在栈顶添加或删除元素，所以我们可以把栈看作一种受限的数组或链表
+
+#### 常用操作
+
+```cpp
+stack<int> stack;
+
+stack.push()    //入栈 O(1)
+stack.pop()     //出栈 O(1)
+int top = stack.top()   //访问栈顶元素 O(1)
+int size = stack.size()     //获取栈长度
+bool empty = stack.empty()  //判空
+```
+
+### 队列
+
+队列（queue）是一种遵循**先入先出**规则的线性数据结构。我们将队列头部称为“队首”，尾部称为“队尾”，将把元素加入队尾的操作称为“入队”，删除队首元素的操作称为“出队”。
+
+#### 常用操作
+```cpp
+queue<int> queue;
+
+queue.push()    //入队 O(1)
+queue.pop()     //出队 O(1)
+int front = queue.front()   //访问队首元素 O(1)
+int size = queue.size()     //获取队列长度
+bool empty = queue.empty()  //判空
+```
+要注意c++中的queue不能访问内部元素
+
+### 双向队列
+
+在队列中，我们仅能删除头部元素或在尾部添加元素。双向队列（double-ended queue）提供了更高的灵活性，允许在头部和尾部执行元素的添加或删除操作。
+
+#### 常用操作
+```cpp
+deque<int> deque;
+
+deque.push_back()   //添加至队尾 O(1)
+deque.push_front()  //添加至队首 O(1)
+deque.pop_back()    //队尾元素出队 O(1)
+deque.pop_front()   //队首元素出队 O(1)
+int front = deque.front()   //获取队首元素 O(1)
+int back = deque.back()     //获取队尾元素 O(1)
+int size = deque.size()     //获取队列长度
+bool empty = deque.empty()  //判空
+```
+
+##  3.哈希表
+
+哈希表（hash table），又称散列表，它通过建立键 key 与值 value 之间的映射，实现高效的元素查询。具体而言，我们向哈希表中输入一个键 key ，则可以在`O(1)`时间内获取对应的值 value 。
+
+可以把哈希表理解为一种高级的数组，这种数组的下标可以是很大的整数，浮点数，字符串甚至结构体．
+
+### 概述
+
+#### 常用操作
+```cpp
+unordered_map<int,string> map;  
+
+map[1145] = "kitty"
+map[1919] = "kobe"
+// 在哈希表中添加键值对 O(1)
+
+string name = map[1145];    //查询 O(1)
+map.erase(1145)     //删除键值对 O(1)
+mp.find(1145)   //查找 O(1)
+```
+C++中的哈希表是基于std::pair的
+
+对于value的初始化取值：int为0、bool为false
+
+#### 遍历哈希表
+```cpp
+//基于std::pair类遍历, .first取了key ， .second取了值
+for(std::pair kv:map)
+{
+    cout << kv.first << "->" << kv.second;
+}
+
+//基于迭代器遍历
+for(unordered_map<int,string>::iterator iter= map.begin(); iter != map.end(); iter++) 
+{
+    cout << iter->first << "->" << iter->second << endl;
+}
+```
+
+#### 哈希表的简单实现
+
+- 桶：在哈希表中，我们将数组中的每个空位称为桶（bucket），每个桶可存储一个键值对。
+- 哈希函数（hash function）：哈希函数的作用是将一个较大的输入空间映射到一个较小的输出空间。在哈希表中，输入空间是所有 key ，输出空间是所有桶（数组索引）。
+![](https://www.hello-algo.com/chapter_hashing/hash_map.assets/hash_function.png)
+
+#### 哈希冲突与扩容
+
+我们将这种多个输入对应同一输出的情况称为哈希冲突（hash collision）。
+
+我们可以通过扩容哈希表来减少哈希冲突。
+
+负载因子（load factor）是哈希表的一个重要概念，其定义为哈希表的元素数量除以桶数量，用于衡量哈希冲突的严重程度，也常作为哈希表扩容的触发条件。
+
+### 哈希冲突
+
+通常情况下哈希函数的输入空间远大于输出空间，因此理论上哈希冲突是不可避免的。而进行哈希表扩容效率太低，我们考虑改进哈希表结构，使得哈希表可以在出现哈希冲突时正常工作。
+
+#### 链式地址
+
+链式地址（separate chaining）将单个元素转换为链表，将键值对作为链表节点，将所有发生冲突的键值对都存储在同一链表中。
+
+基于链式地址实现的哈希表的操作方法发生了以下变化。
+
+- 查询元素：输入 key ，经过哈希函数得到桶索引，即可访问链表头节点，然后遍历链表并对比 key 以查找目标键值对。
+- 添加元素：首先通过哈希函数访问链表头节点，然后将节点（键值对）添加到链表中。
+- 删除元素：根据哈希函数的结果访问链表头部，接着遍历链表以查找目标节点并将其删除。
+
+链式地址存在以下局限性。
+
+- 占用空间增大：链表包含节点指针，它相比数组更加耗费内存空间。
+- 查询效率降低：因为需要线性遍历链表来查找对应元素。
+
+#### 开放寻址
+
+开放寻址（open addressing）不引入额外的数据结构，而是通过“多次探测”来处理哈希冲突，探测方式主要包括线性探测、平方探测和多次哈希等。
+
+##### 线性探测
+线性探测采用固定步长的线性搜索来进行探测，其操作方法与普通哈希表有所不同。
+
+- 插入元素：通过哈希函数计算桶索引，若发现桶内已有元素，则从冲突位置向后线性遍历（步长通常为 
+ ），直至找到空桶，将元素插入其中。
+- 查找元素：若发现哈希冲突，则使用相同步长向后进行线性遍历，直到找到对应元素，返回 value 即可；如果遇到空桶，说明目标元素不在哈希表中，返回 None 。
+  
+开放寻址的方法还有：平方探测、多次哈希等
+
+## 4.树
+
+### 二叉树
+
+二叉树（binary tree）是一种非线性数据结构，代表“祖先”与“后代”之间的派生关系，体现了“一分为二”的分治逻辑。与链表类似，二叉树的基本单元是节点，每个节点包含值、左子节点引用和右子节点引用。
+
+```cpp
+/* 二叉树节点结构体 */
+struct TreeNode {
+    int val;          // 节点值
+    TreeNode *left;   // 左子节点指针
+    TreeNode *right;  // 右子节点指针
+    TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}  // 构造函数
+};
+```
+
+每个节点都有两个引用（指针），分别指向左子节点（left-child node）和右子节点（right-child node），该节点被称为这两个子节点的父节点（parent node）。当给定一个二叉树的节点时，我们将该节点的左子节点及其以下节点形成的树称为该节点的左子树（left subtree），同理可得右子树（right subtree）。在二叉树中，除叶节点外，其他所有节点都包含子节点和非空子树。
+
+常用术语：
+- 根节点（root node）：位于二叉树顶层的节点，没有父节点。
+- 叶节点（leaf node）：没有子节点的节点，其两个指针均指向 None 。
+- 边（edge）：连接两个节点的线段，即节点引用（指针）。
+- 节点所在的层（level）：从顶至底递增，根节点所在层为 1 。
+- 节点的度（degree）：节点的子节点的数量。在二叉树中，度的取值范围是 0、1、2 。
+- 二叉树的高度（height）：从根节点到最远叶节点所经过的边的数量。
+- 节点的深度（depth）：从根节点到该节点所经过的边的数量。
+- 节点的高度（height）：从距离该节点最远的叶节点到该节点所经过的边的数量。
+
+#### 二叉树的基本操作
+
+初始化
+```cpp
+/* 初始化二叉树 */
+// 初始化节点
+TreeNode* n1 = new TreeNode(1);
+TreeNode* n2 = new TreeNode(2);
+TreeNode* n3 = new TreeNode(3);
+TreeNode* n4 = new TreeNode(4);
+TreeNode* n5 = new TreeNode(5);
+// 构建节点之间的引用（指针）
+n1->left = n2;
+n1->right = n3;
+n2->left = n4;
+n2->right = n5;
+````
+
+插入和删除节点
+```cpp
+/* 插入与删除节点 */
+TreeNode* P = new TreeNode(0);
+
+// 在 n1 -> n2 中间插入节点 P
+n1->left = P;
+P->left = n2;
+
+// 删除节点 P
+n1->left = n2;
+// 释放内存
+delete P;
+```
+
+#### 二叉树类型
+
+- **完美二叉树（perfect binary tree）**又称**满二叉树**：所有层的节点都被完全填满。在完美二叉树中，叶节点的度为$0$，其余所有节点的度都为$2$；若树的高度为$h$，则节点总数为 $2^{h+1}-1$，呈现标准的指数级关系
+- **完全二叉树（complete binary tree）**：仅允许最底层的节点不完全填满，且最底层的节点必须从左至右依次连续填充。请注意，完美二叉树也是一棵完全二叉树。
+- **完满二叉树（full binary tree）**：除了叶节点之外，其余所有节点都有两个子节点。
+- **平衡二叉树（balanced binary tree）**：任意节点的左子树和右子树的高度之差的绝对值不超过 1 。
+
+#### 二叉树的退化
+
+所有节点都偏向一侧时，二叉树退化为“链表”。完美二叉树是理想情况，可以充分发挥二叉树“分治”的优势。
+链表则是另一个极端，各项操作都变为线性操作，时间复杂度退化至 $O(n)$。
+
+### 二叉树的遍历
+
+从物理结构的角度来看，树是一种基于链表的数据结构，因此其遍历方式是通过指针逐个访问节点。然而，树是一种非线性数据结构，这使得遍历树比遍历链表更加复杂，需要借助搜索算法来实现。
+
+- **时间复杂度**为$O(n)$
+- **空间复杂度**为$O(n)$
+  
+#### 层序遍历
+
+**层序遍历**（level-order traversal）从顶部到底部逐层遍历二叉树，并在每一层按照从左到右的顺序访问节点。
+
+层序遍历本质上属于**广度优先遍历**（breadth-first traversal），也称**广度优先搜索**（breadth-first search, BFS）。
+
+层序遍历的逻辑是：
+
+1. 先访问根节点
+2. 然后按层从左到右依次访问每个节点
+3. 每访问一个节点，就把它的左右子节点加入队列
+
+```cpp
+void levelOrder(TreeNode* root)
+{
+    if (root == nullptr) return;
+
+    queue<TreeNode*> q;
+    q.push(root);
+
+    while (!q.empty())
+    {
+        TreeNode* node = q.front();
+        q.pop();
+
+        cout << node->val << " ";
+
+        if (node->left)
+            q.push(node->left);
+
+        if (node->right)
+            q.push(node->right);
+    }
+}
+```
+
+#### 前序、中序、后序遍历
+
+前序、中序和后序遍历都属于**深度优先遍历**（depth-first traversal），也称**深度优先搜索**（depth-first search, DFS）
+
+![](https://www.hello-algo.com/chapter_tree/binary_tree_traversal.assets/binary_tree_dfs.png)
+
+```cpp
+// 前序遍历
+void preorder(TreeNode* root)
+{
+    if(!root)return;
+
+    cout<<root->val<<endl;
+    preorder(root->left);
+    preorder(root->right);
+}
+```
+
+```cpp
+// 中序遍历
+void inorder(TreeNode* root)
+{
+    if(!root)return;
+
+    preorder(root->left);
+    cout<<root->val<<endl;
+    preorder(root->right);
+}
+```
+```cpp
+//后序遍历
+void postorder(TreeNode* root)
+{
+    if(!root)return;
+
+    preorder(root->left);
+    preorder(root->right);
+    cout<<root->val<<endl;
+}
+```
+
+### 二叉搜索树(binary search tree)
+
+#### 定义
+
+1. 空树是二叉搜索树。
+2. 对于根节点，左子树中所有节点的值$<$根节点的值$<$右子树中所有节点的值。
+3. 任意节点的左、右子树也是二叉搜索树，即同样满足条件2。
+
+由BST的定义我们可以发现：**二叉搜索树的中序遍历序列是升序的**；利用中序遍历升序的性质，我们在二叉搜索树中获取有序数据仅需$O(n)$时间，无须进行额外的排序操作，非常高效。
+
+
+
+#### 基本操作
+
+BST的相关操作时间复杂度均为$O(\log n)$
+
+##### 查找节点
+
+二叉搜索树的查找操作与二分查找算法的工作原理一致，都是每轮排除一半情况。循环次数最多为二叉树的高度，当二叉树平衡时，时间复杂度为$O(\log n)$。
+
+本质是二分查找，注意最小值在左链的顶点、最大值在右链的顶点
+
+```cpp
+// 循环写法
+TreeNode* search(int num,TreeNode* root)
+{
+    TreeNode* cur = root;
+    
+    while(cur!=nullptr)
+    {
+        if(num>cur->val) cur=cur->right;
+        else if(num<cur->val) cur=cur->left;
+        else return cur;
+    }
+}
+```
+```cpp
+// 递归写法
+TreeNode* search(int num,TreeNode* root)
+{
+    if(root==nullptr) return nullptr;
+    TreeNode* cur = root;
+
+    if(cur->val==num) return cur;
+    else if(num>cur->val) return search(num,cur->right);
+    else return search(num,cur->left);
+}
+```
+
+##### 插入节点
+
+插入节点时要注意：二叉搜索树不允许存在重复节点，否则将违反其定义。因此，若待插入节点在树中已存在，则不执行插入，直接返回。
+
+```cpp
+// 循环写法
+void insert(int num,TreeNode* root)
+{
+    TreeNode* cur = root;
+    TreeNode* parent = nullptr;
+
+    while(cur!=nullptr)
+    {
+        if(num == cur->val) return;
+        parent=cur;
+
+        if(num < cur->val) cur = cur->left;
+        else cur = cur->right;
+    }
+
+    TreeNode* new_node = new TreeNode(num);
+    if(num > parent->val) parent->right = new_node;
+    else parent->left = new_node;
+}
+```
+```cpp
+// 递归写法
+TreeNode* insert(int num,TreeNode* root)
+{
+    TreeNode* cur = root;
+    
+    if(cur == nullptr)
+        return new TreeNode(num);
+    
+    if(num < cur->val)
+        cur->left = insert(num,cur->left);
+    else if(num > cur->val)
+        cur->right = insert(num,cur->right);
+    
+    return root;
+}
+```
+
+##### 删除节点
+
+BST的删除节点操作有三种情况：
+- 目标节点度为0：直接删除即可
+- 目标节点度为1：删除节点后其原本地位需由子结点代替
+- 目标节点度为2：删除节点后其原本地位须由右子树的最小节点（中序后继）或左子树的最大节点（中序前驱）代替
+  
+```cpp
+TreeNode* remove_node(int num,TreeNode* root)
+{
+    if(root==nullptr) return nullptr;
+    TreeNode* parent = nullptr;
+    TreeNode* cur = root;
+
+    while(cur)
+    {
+        if(num > cur->val)
+        {
+            parent = cur;
+            cur=cur->right;
+        }
+        else if(num < cur->val)
+        {
+            parent = cur;
+            cur=cur->left;
+        }
+        else break;
+    }
+    if(cur == nullptr) return root;
+
+    // 度为0或1时
+    if(!(cur->left && cur->right))
+    {
+        TreeNode* child = cur->left != nullptr ? cur->left : cur->right;
+
+        // 删除节点
+        if(cur==root)
+        {
+            root = child;
+        }
+        else
+        {
+            if(cur == parent->left)
+                parent->left = child;
+            else 
+                parent->right = child;
+        }
+        delete cur;
+    }
+
+    // 度为2时（这里取右子树的最小节点）
+    else
+    {
+        //找右子树最小节点
+        TreeNode* right_min = cur->right;
+        while(right_min->left)
+        {
+            right_min = right_min->left;
+        }
+
+        //替换节点
+        int tmp = right_min->val;
+        remove_node(right_min->val,root);
+        cur->val = tmp;
+    }
+
+    return root;
+}
+```
+
+### 平衡二叉搜索树（BBST） --> AVL树
+
+二叉树极端情况下会退化为链表，此时进行操作的时间复杂度从$O(\log n)$退化为$O(n)$；为了避免这种极端情况，我们希望树都是**平衡**的，即指树中每一个结点的左子树和右子树高度差最多为1,以此维持树的结构。
+
+AVL树就是一种典型的平衡二叉搜索树
+
+为了实现AVL树的性质，其节点需要增加节点高度的信息：
+```cpp
+struct TreeNode{
+    int val{};  //节点值
+    int height = 0;  //节点高度
+    TreeNode* left{};   //左子结点
+    TreeNode* right{};  //右子结点
+    TreeNode() = default;
+    explicit TreeNode(int x) : val(x){}
+}
+```
+“节点高度”是指从该节点到它的最远叶节点的距离，即所经过的“边”的数量。需要特别注意的是，叶节点的高度为 0
+ ，而空节点的高度为-1 
+
+#### AVL树的性质
+
+1. 空二叉树是一个AVL树
+2. 如果T是一棵AVL树，那么其左右子树都是AVL树，并且$\left| h(ls) -h (rs) \right| \leq 1$，$h$是其左右子树的高度
+3. 树高为$O(\log n)$
+
+平衡因子：左右子树高度之差，左-右还是右-左都性，我们这里规定为左-右 ；空节点的平衡因子为0
+
+#### 平衡的调整
+
+平衡的调整操作分为包括 左旋（Left Rotate 或者 zag） 和 右旋（Right Rotate 或者 zig） 两种；它能够在不影响二叉树的中序遍历序列的前提下，使失衡节点重新恢复平衡
+
+我们将平衡因子绝对值$>1$的节点称为“失衡节点”。
+
+对于平衡的调整，有以下四种情况:
+
+| 失衡类型 | 失衡原因 | 调整方式 |
+| :---: | :--- | :--- |
+| **LL 型** | T 的左孩子的**左**子树过长导致平衡性破坏 | **右旋**节点 T |
+| **RR 型** | T 的右孩子的**右**子树过长导致平衡性破坏（与 LL 型类似） | **左旋**节点 T |
+| **LR 型** | T 的左孩子的**右**子树过长导致平衡性破坏 | 先**左旋**节点 L（成为 LL 型），再**右旋**节点 T |
+| **RL 型** | T 的右孩子的**左**子树过长导致平衡性破坏（与 LR 型类似） | 先**右旋**节点 R（成为 RR 型），再**左旋**节点 T |
+
+
+1. 右旋解决LL型失衡
+
+```cpp
+
+```
+
+### 红黑树

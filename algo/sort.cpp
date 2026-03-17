@@ -52,6 +52,25 @@ void insertion_sort(vector<int> &nums)
     }
 }
 
+// 希尔排序
+void shell_sort(vector<int> &nums)
+{
+    int n = nums.size();
+    int gap = n / 2;
+
+    while(gap > 0)
+    {
+        for(int i=gap;i<n;i++)
+        {
+            for(int j=i;j>=gap && nums[j]<nums[j-gap];j-=gap)
+            {
+                swap(nums[j],nums[j-gap]);
+            }
+        }
+        gap = gap / 2;
+    }
+}
+
 // 快速排序
 int partition(vector<int> &nums,int left,int right)
 {
@@ -150,6 +169,107 @@ void heapSort(vector<int> &nums)
         shiftDown(nums,i,0);
     }
 }
+
+// 桶排序
+void bucketSort(vector<int> &nums,int bucket_size)
+{
+    int max = *max_element(nums.begin(),nums.end());
+    int min = *min_element(nums.begin(),nums.end());
+
+    int n =(max - min) / bucket_size + 1;
+    vector<vector<int>> buckets(n);
+
+    for(int num :nums)
+    {
+        buckets[(num-min)/bucket_size].push_back(num);
+    }
+    int p = 0;
+    for(auto &bucket:buckets)
+    {
+        insertion_sort(bucket);
+        for(int x : bucket)
+        {
+            nums[p] = x;
+            p++;
+        }
+    }
+}
+
+// 计数排序
+void counting_sort(vector<int> &nums)
+{
+    int max = *max_element(nums.begin(),nums.end());
+    int min = *min_element(nums.begin(),nums.end());
+    vector<int> counter(max - min +1,0);
+
+    // 统计每个数出现了几次
+    for(int num : nums)
+    {
+        counter[num - min]++;
+    }
+
+    //统计前缀和，将出现次数转换为尾索引
+    for(int i=0;i<max-min+1;i++)
+    {
+        counter[i+1] += counter[i];
+    }
+
+    //转化为结果数组
+    vector<int> res(nums.size());
+    for(auto num = nums.rbegin();num!=nums.rend();num++)
+    {
+        res[counter[*num-min]-1] = *num;
+        counter[*num-min]--;
+    }
+    nums = res;
+
+}
+
+// 基数排序
+void radix_sort(vector<int> &nums)
+{
+    int max = *max_element(nums.begin(), nums.end());
+    int min = *min_element(nums.begin(), nums.end());
+
+    // 将所有数平移到非负区间，便于按位取 digit
+    long long offset = (min < 0) ? -(long long)min : 0;
+
+    vector<int> res(nums.size());
+
+    // 找到平移后的最大值，决定需要做多少轮（个位、十位、百位...）
+    long long shifted_max = (long long)max + offset;
+
+    for (long long exp = 1; shifted_max / exp > 0; exp *= 10)
+    {
+        vector<int> counter(10, 0);
+
+        // 统计当前位(0-9)出现次数
+        for (int num : nums)
+        {
+            long long x = (long long)num + offset;
+            int digit = (int)((x / exp) % 10);
+            counter[digit]++;
+        }
+
+        // 前缀和：counter[d] 变成 digit<=d 的元素总数（尾索引）
+        for (int i = 1; i < 10; i++)
+        {
+            counter[i] += counter[i - 1];
+        }
+
+        // 从后往前稳定回填
+        for (auto it = nums.rbegin(); it != nums.rend(); ++it)
+        {
+            long long x = (long long)(*it) + offset;
+            int digit = (int)((x / exp) % 10);
+
+            res[counter[digit] - 1] = *it;
+            counter[digit]--;
+        }
+
+        nums = res; // 或者 nums.swap(res);
+    }
+}
 int main()
 {
     for(int i = 0;i<nums.size();i++)
@@ -164,6 +284,10 @@ int main()
     // quicksort(nums,0,nums.size()-1);
     // merge_sort(nums,0,nums.size()-1);
     // heapSort(nums);
+    // bucketSort(nums,2);
+    // shell_sort(nums);
+    // counting_sort(nums);
+    // radix_sort(nums);
 
     for(int i = 0;i<nums.size();i++)
     {

@@ -1,0 +1,55 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+void func(int n,int row,vector<bool> &cols,vector<bool> &diags1,vector<bool> &diags2,vector<vector<int>> &res,vector<int> &tmp)
+{
+    if(row == n)
+    {
+        res.push_back(tmp);
+        return;
+    }
+
+    for(int col=0;col<n;col++)
+    {
+        int diag1 = col - row + n - 1;
+        int diag2 = col + row;
+        if(!cols[col] && !diags1[diag1] && !diags2[diag2])
+        {
+            cols[col] = true;
+            diags1[diag1] = true;
+            diags2[diag2] = true;
+            tmp.push_back(col+1);
+
+            func(n,row+1,cols,diags1,diags2,res,tmp);
+            cols[col] = diags1[diag1] =diags2[diag2] = false;
+            tmp.pop_back();
+        }
+    }
+}
+int main()
+{
+    int n;
+    cin >> n;
+    vector<bool> cols(n,false);
+    vector<bool> diags1(2*n - 1,false);
+    vector<bool> diags2(2*n - 1,false);
+    vector<vector<int>> res;
+    vector<int> tmp;
+
+    func(n,0,cols,diags1,diags2,res,tmp);
+
+    for(int i=0;i<3;i++)
+    {
+        for(int j=0;j<n;j++)
+        {
+            cout << res[i][j] <<' ';
+        }
+        cout << endl;
+    }
+    cout << res.size();
+    return 0;
+}
+
+/*
+一个非常经典的n皇后问题，回溯算法的典例
+*/
